@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>SpotyPy</title>
+
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="main.css">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <div class="container">
+            <nav class="navbar navbar-default" role="navigation">
+              <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </button>
+                  <a class="navbar-brand" href="#">SpotyPy</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                  <ul class="nav navbar-nav">
+                    <li class="player-control play-prev">
+                        <a href="#"><span class="glyphicon glyphicon-backward"></span></a>
+                    </li>
+                    <li class="player-control play-pause">
+                        <a href="#"><span class="glyphicon glyphicon-play"></span></a>
+                    </li>
+                    <li class="player-control play-next">
+                        <a href="#"><span class="glyphicon glyphicon-forward"></span></a>
+                    </li>
+                      <li class="progress-container">
+                          <div class="progress">
+                              <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                                <span class="sr-only">60% Complete</span>
+                              </div>
+                            </div>
+                      </li>
+                    <li class="player-control stop">
+                        <a href="#"><span class="glyphicon glyphicon-stop"></span></a>
+                    </li>
+                    <li id="current">
+                    </li>
+                    <li class="player-control volume" data-volume="100">
+                        <a href="#"><span class="glyphicon glyphicon-volume-up"></span></a>
+                        <a href="#"><span class="glyphicon glyphicon-volume-down"></span></a>
+                    </li>
+                  </ul>
+                  <form class="navbar-form navbar-right" role="search">
+                    <div class="form-group">
+                      <input type="text" class="form-control" placeholder="Search">
+                    </div>
+                    <button type="submit" class="btn btn-default">Submit</button>
+                  </form>
+
+                </div><!-- /.navbar-collapse -->
+              </div><!-- /.container-fluid -->
+            </nav>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="well" id="history">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="well" id="queue">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="well" id="search-results">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed --><!-- Latest compiled and minified CSS -->
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        <script src="handlebars-v1.3.0.js"></script>
+        <script src="main.js"></script>
+
+        <script id="search-item-template" type="text/x-handlebars-template">
+            <li data-full="{{full}}">
+                <span class="glyphicon glyphicon-play"></span>
+                <span class="glyphicon glyphicon-plus"></span>
+                <span class="singer">{{singer}}</span> - <span class="song">{{song}}</span> <span class="duration pull-right">{{duration}}</span>
+            </li>
+        </script>
+        <script id="queue-item-template" type="text/x-handlebars-template">
+            <li data-full="{{full}}">
+                <span class="glyphicon glyphicon-play"></span>
+                <span class="singer">{{singer}}</span> - <span class="song">{{song}}</span>
+                <span class="duration pull-right">{{duration}}</span>
+            </li>
+        </script>
+        <script id="history-item-template" type="text/x-handlebars-template">
+            <li data-full="{{full}}">
+                <span class="glyphicon glyphicon-play"></span>
+                <span class="glyphicon glyphicon-plus"></span>
+                <span class="singer">{{singer}}</span> - <span class="song">{{song}}</span>
+                <span class="duration pull-right">{{duration}}</span>
+            </li>
+        </script>
+        <script id="current-item-template" type="text/x-handlebars-template">
+                <a><span class="singer">{{singer}}</span> - <span class="song">{{song}}</span></a>
+        </script>
+
+
+    </body>
+</html>

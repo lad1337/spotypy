@@ -1,0 +1,58 @@
+.progress-container{
+    width: 300px;
+    margin-top: 15px;
+}
+.progress-container .progress{
+    margin-bottom: 0;
+}
+
+
+.container>.row>.col-md-8 .row{
+    margin-left: 0;
+}
+
+#queue ul,
+#history ul,
+#search-results ul{
+    padding-left: 0;
+}
+
+#queue li,
+#history li,
+#search-results li{
+    list-style: none;
+}
+
+.glyphicon:hover{
+    color: #f0ad4e;
+}
+
+#current a{
+    display: inline-block;
+    max-width: 256px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 20px;
+}
+nav.navbar ul.navbar-nav li.player-control a{
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+nav.navbar ul.navbar-nav li.player-control.volume{
+    margin-top: 6px;
+}
+
+nav.navbar ul.navbar-nav li.player-control.volume a{
+    padding: 0;
+}
+
+#queue ul:after{
+    content: "Queue";
+    float: right;
+}
+#history ul:after{
+    content: "History";
+    float: right;
+}
