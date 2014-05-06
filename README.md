@@ -5,7 +5,7 @@ spotypy
 
 virtualenv env
 
-source env/bin/activate (activate.fish)
+. env/bin/activate
 pip install -r requirements.txt
 
 brew install mplayer
