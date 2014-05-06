@@ -19,7 +19,8 @@ function check_queue(){
         $.each(results, function(i, item){
             item["full"] = JSON.stringify(item);
             list.append(q_template(item));
-        })
+        });
+        
     });
     $.getJSON("/history", function(results){
         $("#history").html("<ul></ul>");
@@ -39,6 +40,7 @@ function check_current(){
     var template = Handlebars.compile(source);
     $.getJSON("/current", function(current){
         $("#current").html(template(current));
+
     });
 
 }
