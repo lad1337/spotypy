@@ -5,7 +5,7 @@ import json
 import uuid
 import time
 import mps
-from threading import Thread, Lock
+from threading import Lock
 from bottle import Bottle, static_file, response, request
 
 application = Bottle()
@@ -17,6 +17,7 @@ QUEUE = {}
 QUEUE_IDS = []
 
 q_lock = Lock()
+
 
 def check_q():
     global CURRENT, QUEUE, QUEUE_IDS, HISTORY, HISTORY_IDS, q_lock
@@ -39,6 +40,7 @@ def _start_song(song_data):
         _play(song_data)
     return result
 
+
 def _play(song_data):
     global CURRENT, QUEUE, QUEUE_IDS, HISTORY, HISTORY_IDS
     if "uuid" not in song_data:
@@ -53,11 +55,13 @@ def _play(song_data):
         _add_to_history(CURRENT)
     CURRENT = song_data
 
+
 def _stop():
     global CURRENT, QUEUE, QUEUE_IDS, HISTORY, HISTORY_IDS
     if CURRENT:
         _add_to_history(CURRENT)
     CURRENT = {}
+
 
 def _add_to_history(son_data):
     global CURRENT, QUEUE, QUEUE_IDS, HISTORY, HISTORY_IDS
@@ -67,6 +71,7 @@ def _add_to_history(son_data):
         HISTORY_IDS = HISTORY_IDS[1:]
         HISTORY = {uuid:HISTORY[uuid] for uuid in HISTORY_IDS}
 
+
 def _add_to_q(song_data):
     global CURRENT, QUEUE, QUEUE_IDS, HISTORY, HISTORY_IDS
     if "uuid" not in song_data:
@@ -74,6 +79,7 @@ def _add_to_q(song_data):
     s_uuid = song_data["uuid"]
     QUEUE[s_uuid] = song_data
     QUEUE_IDS.append(s_uuid)
+
 
 def _remove_from_q(song_data):
     global CURRENT, QUEUE, QUEUE_IDS, HISTORY, HISTORY_IDS
@@ -213,7 +219,6 @@ def set_stats():
         setattr(mps.MPLAYER, key, value)
     response.content_type = 'application/json'
     return json.dumps({})
-
 
 
 if __name__ == "__main__":
