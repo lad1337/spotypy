@@ -33,7 +33,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: 20px;
+    height: 40px;
 }
 nav.navbar ul.navbar-nav li.player-control a{
     padding-left: 4px;
