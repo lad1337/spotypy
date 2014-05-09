@@ -5,7 +5,11 @@ import json
 import uuid
 import time
 import mps
+import feedparser
+from random import choice
 from threading import Lock
+from string import strip
+from itertools import chain
 from bottle import Bottle, static_file, response, request
 
 application = Bottle()
@@ -16,6 +20,8 @@ CURRENT = {}
 QUEUE = {}
 QUEUE_IDS = []
 
+LASTFM_USER_LIST = []
+
 q_lock = Lock()
 
 
@@ -23,18 +29,26 @@ def check_q():
     global CURRENT, QUEUE, QUEUE_IDS, HISTORY, HISTORY_IDS, q_lock
     with q_lock:
         if not mps.MPLAYER:
-            if QUEUE_IDS and QUEUE:
-                _start_song(QUEUE[QUEUE_IDS[0]])
-                time.sleep(1)
+            _fucking_next()
             return
-        print "percent_pos: {}".format(mps.MPLAYER.percent_pos)
+        #print "percent_pos: {}".format(mps.MPLAYER.percent_pos)
         if mps.MPLAYER.percent_pos > 98:
             _stop()
             mps.MPLAYER = None
 
+def _fucking_next():
+    if QUEUE_IDS and QUEUE:
+        _start_song(QUEUE[QUEUE_IDS[0]])
+        time.sleep(1)
+    elif LASTFM_USER_LIST:
+        r_song = choice(choice(map(_lastfm, LASTFM_USER_LIST)))
+        _start_song(choice(mps.search(*map(strip, r_song.split("-")))))
+        time.sleep(2)
+
+
 
 def _start_song(song_data):
-    print "starting song {}".format(song_data)
+    print u"starting song {singer} - {song} {duration}".format(**song_data)
     result = mps.playsong(song_data)
     if result:
         _play(song_data)
@@ -89,6 +103,11 @@ def _remove_from_q(song_data):
     if s_uuid in QUEUE:
         del QUEUE[s_uuid]
 
+def _lastfm(user_name):
+    url = 'http://ws.audioscrobbler.com/1.0/user/{}/recenttracks.rss'.format(user_name)
+    print "feed url: {}".format(url)
+    d = feedparser.parse(url)
+    return [i.title for i in d.entries]
 
 @application.get('/ping')
 def ping_get(db, merchant_id):
@@ -108,7 +127,14 @@ def files(filename):
 @application.get('/search')
 def index():
     params = bottle.request.params
-    result = mps.search(params["term"])
+    result = []
+    if params["term"].startswith("fm"):
+        for song in _lastfm(params["term"].split()[1].strip()):
+            _results = mps.search(*map(strip, song.split("-")))
+            if _results:
+                result.append(_results[0])
+    else:
+        result = mps.search(params["term"])
     response.content_type = 'application/json'
     return json.dumps(result)
 
@@ -119,6 +145,32 @@ def play_song():
     result = _start_song(song_data)
     response.content_type = 'application/json'
     return json.dumps({"result": result})
+
+
+@application.post('/user')
+def user():
+    global LASTFM_USER_LIST
+    user_name = json.loads(request.body.read()).get("user_name", 0)
+    if user_name and user_name not in LASTFM_USER_LIST:
+        LASTFM_USER_LIST.append(user_name)
+    response.content_type = 'application/json'
+    return json.dumps(LASTFM_USER_LIST)
+
+
+@application.get('/users')
+def users():
+    global LASTFM_USER_LIST
+    response.content_type = 'application/json'
+    return json.dumps(LASTFM_USER_LIST)
+
+@application.post('/remove_user')
+def remove_user():
+    global LASTFM_USER_LIST
+    user_name = json.loads(request.body.read()).get("user_name", 0)
+    if user_name and user_name in LASTFM_USER_LIST:
+        LASTFM_USER_LIST.remove(user_name)
+    response.content_type = 'application/json'
+    return json.dumps(LASTFM_USER_LIST)
 
 
 @application.get('/current')
@@ -155,8 +207,7 @@ def play_song():
     global QUEUE, QUEUE_IDS
     result = mps.pause_pause()
     if not result:
-        if QUEUE and QUEUE_IDS:
-            _start_song(QUEUE[QUEUE_IDS[0]])
+        _fucking_next()
     response.content_type = 'application/json'
     return json.dumps({"result": result})
 
@@ -174,17 +225,14 @@ def pause():
     global QUEUE, QUEUE_IDS
     result = mps.pause_pause()
     if not result:
-        if QUEUE and QUEUE_IDS:
-            _start_song(QUEUE[QUEUE_IDS[0]])
+        _fucking_next()
     response.content_type = 'application/json'
     return json.dumps({"result": result})
 
 
 @application.get('/next')
 def next():
-    global QUEUE, QUEUE_IDS
-    if QUEUE and QUEUE_IDS:
-        _start_song(QUEUE[QUEUE_IDS[0]])
+    _fucking_next()
 
 @application.get('/prev')
 def prev():

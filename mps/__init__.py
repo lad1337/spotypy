@@ -27,7 +27,7 @@ else:
 
 
 def search(artist, song_title=""):
-
+    print u"searching for: {} - {}".format(artist, song_title)
     found_songs = []
     bitrates = []
 

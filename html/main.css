@@ -51,8 +51,37 @@ nav.navbar ul.navbar-nav li.player-control.volume a{
 #queue ul:after{
     content: "Queue";
     float: right;
+    opacity: 0.5;
 }
 #history ul:after{
     content: "History";
     float: right;
+    opacity: 0.5;
+}
+
+.navbar-brand{
+    margin-top: -6px;
+}
+
+#users{
+    padding-left: 0;
+}
+
+#users>span{
+    font-size: 105%;
+}
+
+#users>span .glyphicon{
+    position: relative;
+    top: 2px;
+    left: 1px;
+}
+
+form.col-md-4{
+    padding-right: 0;
+}
+form.col-md-4:after{
+    content: "Random Auto Play";
+    float: right;
+    opacity: 0.5;
 }

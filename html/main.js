@@ -31,8 +31,8 @@ function check_queue(){
         })
     });
     check_current();
+    check_users();
 }
-
 
 
 function check_current(){
@@ -40,10 +40,23 @@ function check_current(){
     var template = Handlebars.compile(source);
     $.getJSON("/current", function(current){
         $("#current").html(template(current));
-
     });
 
 }
+
+
+function check_users(){
+    var source   = $("#user-item-template").html();
+    var template = Handlebars.compile(source);
+    $.getJSON("/users", function(users){
+        $("#users").html("");
+        $.each(users, function(i, user){
+            $("#users").append(template({name: user}));
+        });
+
+    });
+}
+
 
 var refresh_interval_percent;
 var refresh_interval_queue;
@@ -91,6 +104,20 @@ $(document).ready(function() {
             check_queue();
             $(".player-control.volume").data("volume", volume);
         });
+    });
+
+    $("form.col-md-4").on("submit", function( event ) {
+        event.preventDefault();
+        var input = $("input", this);
+        var user_name = input.val();
+        console.log("adding user", user_name);
+        $.post("/user", JSON.stringify({user_name: user_name}), function(){
+            check_users();
+            input.val("");
+        });
+    });
+    $(document).on("click", ".glyphicon-remove-sign", function(){
+        $.post("/remove_user", JSON.stringify({user_name: $(this).parent().data("name")}), check_users);
     });
 
     var source   = $("#search-item-template").html();

@@ -67,9 +67,9 @@
                   </ul>
                   <form class="navbar-form navbar-right" role="search">
                     <div class="form-group">
-                      <input type="text" class="form-control" placeholder="Search">
+                      <input type="text" class="form-control" placeholder="search" title="try 'fm your_lasfm_username'">
                     </div>
-                    <button type="submit" class="btn btn-default">Submit</button>
+                    <button type="submit" class="btn btn-default">GO</button>
                   </form>
 
                 </div><!-- /.navbar-collapse -->
@@ -84,6 +84,19 @@
                     <div class="row">
                         <div class="well" id="queue">
                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8" id="users">
+                        </div>
+                        <form class="col-md-4">
+                            <div class="input-group input-group-sm">
+                                <input placeholder="lastfm username" class="form-control" id="user-name">
+
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="submit" id="add-user">Add</button>
+                                </span>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -123,6 +136,9 @@
                 <span class="singer">{{singer}}</span> - <span class="song">{{song}}</span>
                 <span class="duration pull-right">{{duration}}</span>
             </li>
+        </script>
+        <script id="user-item-template" type="text/x-handlebars-template">
+                <span data-name="{{name}}" class="label label-primary">{{name}} <span class="glyphicon glyphicon-remove-sign"></span></span>
         </script>
         <script id="current-item-template" type="text/x-handlebars-template">
                 <a><span class="singer">{{singer}}</span> - <span class="song">{{song}}</span></a>
