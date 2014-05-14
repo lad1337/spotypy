@@ -7,24 +7,38 @@
 }
 
 
-.container>.row>.col-md-8 .row{
+.container>.row>.col-md-8 .row,
+.col-md-4 .row{
     margin-left: 0;
 }
 
+
+.col-md-4 .row{
+    margin-right: 0;
+}
+
+
 #queue ul,
 #history ul,
-#search-results ul{
+#search-results ul,
+#favorites ul{
     padding-left: 0;
 }
 
 #queue li,
 #history li,
-#search-results li{
+#search-results li,
+#favorites li,
+nav .volume-container{
     list-style: none;
 }
 
 .glyphicon:hover{
     color: #96c93c;
+}
+
+#current{
+    margin-top: 15px;
 }
 
 #current a{
@@ -35,17 +49,23 @@
     text-overflow: ellipsis;
     height: 40px;
 }
-nav.navbar ul.navbar-nav li.player-control a{
+
+nav li.player-control a{
     padding-left: 4px;
     padding-right: 4px;
 }
 
-nav.navbar ul.navbar-nav li.player-control.volume{
+nav li.player-control.volume{
     margin-top: 6px;
 }
 
-nav.navbar ul.navbar-nav li.player-control.volume a{
+nav li.player-control.volume a{
     padding: 0;
+}
+
+nav form.navbar-form.navbar-right{
+    width: 25%;
+    margin-right: 0 !important;
 }
 
 #queue ul:after{
@@ -55,6 +75,16 @@ nav.navbar ul.navbar-nav li.player-control.volume a{
 }
 #history ul:after{
     content: "History";
+    float: right;
+    opacity: 0.5;
+}
+#search-results ul:after{
+    content: "Search Results";
+    float: right;
+    opacity: 0.5;
+}
+#favorites ul:after{
+    content: "Favorites";
     float: right;
     opacity: 0.5;
 }
@@ -80,8 +110,48 @@ nav.navbar ul.navbar-nav li.player-control.volume a{
 form.col-md-4{
     padding-right: 0;
 }
+
+.col-md-4 .title{
+    display: inline-block;
+    width: calc(100% - 94px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-indent: 0%;
+    transition-property: text-indent;
+    transition-duration: 3s;
+    transition-delay: 0.1s;
+}
+.col-md-4 .title:hover{
+    text-indent: -34%;
+}
+
+.col-md-4 .glyphicon{
+    top: -3px;
+}
+
 form.col-md-4:after{
     content: "R.a.p. (Random auto play)";
     float: right;
     opacity: 0.5;
+}
+/* http://jsfiddle.net/jonathansampson/XxUXD/ */
+/* Make it a marquee */
+.marquee {
+    width: 300px;
+    margin: 0 auto;
+    overflow: hidden;
+    white-space: nowrap;
+    box-sizing: border-box;
+    animation: marquee 15s linear infinite;
+}
+
+.marquee:hover {
+    animation-play-state: paused
+}
+
+/* Make it move */
+@keyframes marquee {
+    0%   { text-indent: 25em }
+    100% { text-indent: -10em }
 }

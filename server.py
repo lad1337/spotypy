@@ -41,9 +41,13 @@ def _fucking_next():
         _start_song(QUEUE[QUEUE_IDS[0]])
         time.sleep(1)
     elif LASTFM_USER_LIST:
-        r_song = choice(choice(map(_lastfm, LASTFM_USER_LIST)))
-        _start_song(choice(mps.search(*map(strip, r_song.split("-")))))
-        time.sleep(2)
+        results = None
+        while not results:
+            r_song = choice(choice(map(_lastfm, LASTFM_USER_LIST)))
+            results = mps.search(*map(strip, r_song.split("-")))
+            time.sleep(1)
+        _start_song(choice(results))
+        time.sleep(1)
 
 
 
@@ -135,6 +139,9 @@ def index():
                 result.append(_results[0])
     else:
         result = mps.search(params["term"])
+    for r in result:
+        if not "uuid" in r:
+            r["uuid"] = str(uuid.uuid4())
     response.content_type = 'application/json'
     return json.dumps(result)
 

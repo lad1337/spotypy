@@ -57,6 +57,24 @@ function check_users(){
     });
 }
 
+function render_favs(){
+    $("#favorites").html("<ul></ul>");
+    var list = $("#favorites ul");
+    var favs = JSON.parse(localStorage.getItem("favs"));
+    if(!favs){
+        $("#favorites").parent().hide();
+        return;
+    }else{
+        $("#favorites").parent().show();
+    }
+
+    var source   = $("#favorites-item-template").html();
+    var template = Handlebars.compile(source);
+    $.each(favs, function(i, fav){
+        fav["full"] = JSON.stringify(fav);
+        list.append(template(fav));
+    });
+}
 
 var refresh_interval_percent;
 var refresh_interval_queue;
@@ -69,6 +87,14 @@ function init_polls(){
     refresh_interval_queue = window.setInterval(check_queue, 20000);
 }
 
+function is_song_in_list(uuid, list){
+    for (index = 0; index < list.length; ++index) {
+        if(list[index]["uuid"] == uuid){
+            return true;
+        }
+    }
+    return false;
+}
 
 $(document).ready(function() {
     init_polls();
@@ -137,13 +163,44 @@ $(document).ready(function() {
         })
     });
 
-    $(document).on('click', "#search-results .glyphicon-play, #queue .glyphicon-play, #history .glyphicon-play", function () {
+    $(document).on('click', "#search-results .glyphicon-play, #queue .glyphicon-play, #history .glyphicon-play, #favorites .glyphicon-play", function () {
         var item = $(this).parent();
         $.post("/play", JSON.stringify(item.data("full")), check_queue);
     });
 
+    $(document).on('click', ".glyphicon-star", function () {
+        var item = $(this).parent();
+        var data = item.data("full");
+        var favs = JSON.parse(localStorage.getItem("favs"));
+        if(!favs){
+            favs = [];
+        }
+        if(is_song_in_list(data["uuid"], favs))
+            return;
+        favs.push(data);
+        localStorage.setItem("favs", JSON.stringify(favs));
+        render_favs();
+    });
 
-    $(document).on('click', "#search-results .glyphicon-plus, #history .glyphicon-plus", function () {
+    $(document).on('click', ".glyphicon-minus", function () {
+        var item = $(this).parent();
+        var data = item.data("full");
+        var favs = JSON.parse(localStorage.getItem("favs"));
+        if(!favs){
+            return;
+        }
+        var new_favs = [];
+        $.each(favs, function(i, fav){
+            if(data["uuid"] != fav["uuid"]){
+                new_favs.push(fav);
+            }
+        });
+        localStorage.setItem("favs", JSON.stringify(new_favs));
+        render_favs();
+    });
+
+
+    $(document).on('click', ".glyphicon-plus", function () {
         var item = $(this).parent();
         $.ajax({
           type: "PUT",
@@ -152,5 +209,6 @@ $(document).ready(function() {
           success: check_queue
         });
     });
+    render_favs();
 
 });
