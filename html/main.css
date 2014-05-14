@@ -135,15 +135,25 @@ form.col-md-4:after{
     float: right;
     opacity: 0.5;
 }
+
+nav #cover{
+    height: 50px;
+    width: 50px;
+    margin-left: -30px;
+    position: relative;
+    background-size: cover;
+    background-repeat:no-repeat;
+}
+
 /* http://jsfiddle.net/jonathansampson/XxUXD/ */
 /* Make it a marquee */
 .marquee {
-    width: 300px;
+    width: 280px;
     margin: 0 auto;
     overflow: hidden;
     white-space: nowrap;
     box-sizing: border-box;
-    animation: marquee 15s linear infinite;
+    animation: marquee 20s linear infinite;
 }
 
 .marquee:hover {
@@ -152,6 +162,6 @@ form.col-md-4:after{
 
 /* Make it move */
 @keyframes marquee {
-    0%   { text-indent: 25em }
-    100% { text-indent: -10em }
+    0%   { text-indent: 20em }
+    100% { text-indent: -8em }
 }

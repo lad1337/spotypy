@@ -6,11 +6,13 @@ import uuid
 import time
 import mps
 import feedparser
+import requests
 from random import choice
 from threading import Lock
 from string import strip
 from itertools import chain
 from bottle import Bottle, static_file, response, request
+from bs4 import BeautifulSoup
 
 application = Bottle()
 
@@ -71,6 +73,9 @@ def _play(song_data):
 
     if CURRENT:
         _add_to_history(CURRENT)
+    if "cover_url" not in song_data:
+        cover_url = _steal_image(song_data)
+        song_data["cover_url"] = cover_url
     CURRENT = song_data
 
 
@@ -112,6 +117,15 @@ def _lastfm(user_name):
     print "feed url: {}".format(url)
     d = feedparser.parse(url)
     return [i.title for i in d.entries]
+
+
+def _steal_image(song_data):
+    term = "{singer} {song} album cover".format(**song_data)
+    # https://www.google.de/search?q=Emil+Bulls+-+Here+Comes+the+Fire&tbm=isch
+    payload = {"tbm": "isch", "q": term}
+    r = requests.get("https://www.google.de/search", params=payload)
+    soup = BeautifulSoup(r.text)
+    return soup.find("img")["src"]
 
 @application.get('/ping')
 def ping_get(db, merchant_id):

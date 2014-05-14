@@ -40,6 +40,10 @@ function check_current(){
     var template = Handlebars.compile(source);
     $.getJSON("/current", function(current){
         $("#current").html(template(current));
+        if(!current["cover_url"])
+            $("#cover").css("background-image", "");
+        else
+            $("#cover").css("background-image", "url('"+ current["cover_url"]+ "')");
     });
 
 }
