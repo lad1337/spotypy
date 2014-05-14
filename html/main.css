@@ -81,7 +81,7 @@ form.col-md-4{
     padding-right: 0;
 }
 form.col-md-4:after{
-    content: "Random Auto Play";
+    content: "R.a.p. (Random auto play)";
     float: right;
     opacity: 0.5;
 }
