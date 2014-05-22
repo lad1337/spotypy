@@ -27,11 +27,11 @@ else:
 
 
 def search(artist, song_title=""):
-    print u"searching for: {} - {}".format(artist, song_title)
+    print u"searching for: {} - {}".format(unicode(artist), unicode(song_title))
     found_songs = []
     bitrates = []
 
-    return dosearch(u"{} {}".format(artist, song_title))
+    return dosearch(u"{} {}".format(unicode(artist), unicode(song_title)))
     best_song = None
     best_song_score = (0, 0)
     for song_version in song_versions:

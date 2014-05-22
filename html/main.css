@@ -2,21 +2,19 @@
     width: 300px;
     margin-top: 15px;
 }
+
 .progress-container .progress{
     margin-bottom: 0;
 }
-
 
 .container>.row>.col-md-8 .row,
 .col-md-4 .row{
     margin-left: 0;
 }
 
-
 .col-md-4 .row{
     margin-right: 0;
 }
-
 
 #queue ul,
 #history ul,
@@ -134,6 +132,16 @@ form.col-md-4:after{
     content: "R.a.p. (Random auto play)";
     float: right;
     opacity: 0.5;
+}
+
+.mark,
+.mark *{
+    color: #428bca !important;
+    text-shadow:
+    -1px -1px 0 #96c93c,
+    1px -1px 0 #96c93c,
+    -1px 1px 0 #96c93c,
+    1px 1px 0 #96c93c;
 }
 
 nav #cover{

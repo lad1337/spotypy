@@ -100,22 +100,42 @@ function is_song_in_list(uuid, list){
     return false;
 }
 
+function set_mark_request(element){
+    element.addClass("mark");
+}
+
+function remove_mark_request(element){
+    element.removeClass("mark");
+}
+
+
 $(document).ready(function() {
     init_polls();
 
     $(".play-pause").click(function(){
-        $.get("/pause",function(){});
+        var icon = $(this);
+        set_mark_request(icon);
+        $.get("/pause",function(){check_queue(); remove_mark_request(icon);});
     });
     $(".stop").click(function(){
-        $.get("/stop",check_queue);
+        var icon = $(this);
+        set_mark_request(icon);
+        $.get("/stop",function(){check_queue(); remove_mark_request(icon);});
     });
     $(".play-prev").click(function(){
-        $.get("/prev",check_queue);
+        var icon = $(this);
+        set_mark_request(icon);
+        $.get("/prev",function(){check_queue(); remove_mark_request(icon);});
     });
     $(".play-next").click(function(){
-        $.get("/next",check_queue);
+        var icon = $(this);
+        console.log("next", icon);
+        set_mark_request(icon);
+        $.get("/next",function(){check_queue(); remove_mark_request(icon);});
     });
     $(".glyphicon-volume-down").click(function(){
+        var icon = $(this);
+        set_mark_request(icon);
         var volume = parseInt($(".player-control.volume").data("volume"));
         volume -= 5;
         if(volume < 0)
@@ -123,9 +143,12 @@ $(document).ready(function() {
         $.post("/status", JSON.stringify({volume: volume}),function(){
             check_queue();
             $(".player-control.volume").data("volume", volume);
+            remove_mark_request(icon);
         });
     });
     $(".glyphicon-volume-up").click(function(){
+        var icon = $(this);
+        set_mark_request(icon);
         var volume = parseInt($(".player-control.volume").data("volume"));
         volume += 5;
         if(volume >= 100)
@@ -133,6 +156,7 @@ $(document).ready(function() {
         $.post("/status", JSON.stringify({volume: volume}),function(){
             check_queue();
             $(".player-control.volume").data("volume", volume);
+            remove_mark_request(icon);
         });
     });
 
@@ -156,6 +180,8 @@ $(document).ready(function() {
     $("nav form").on("submit", function( event ) {
         event.preventDefault();
         var term = $("input", this).val();
+        var button = $("button", this);
+        set_mark_request(button);
         console.log("searching for", term);
         $.getJSON("/search", {term: term}, function(results){
             $("#search-results").html("<ul></ul>");
@@ -163,13 +189,17 @@ $(document).ready(function() {
             $.each(results, function(i, item){
                 item["full"] = JSON.stringify(item);
                 list.append(template(item));
-            })
+            });
+
+            remove_mark_request(button);
         })
     });
 
     $(document).on('click', "#search-results .glyphicon-play, #queue .glyphicon-play, #history .glyphicon-play, #favorites .glyphicon-play", function () {
-        var item = $(this).parent();
-        $.post("/play", JSON.stringify(item.data("full")), check_queue);
+        var icon = $(this);
+        var item = icon.parent();
+        set_mark_request(icon);
+        $.post("/play", JSON.stringify(item.data("full")), function(){check_queue(); remove_mark_request(icon);});
     });
 
     $(document).on('click', ".glyphicon-star", function () {
