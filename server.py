@@ -33,8 +33,8 @@ class QueueItem(object):
         self.uuid = uuid
         self.vote_count = vote_count
 
-    def __cmp__(self, other):
-        return self.vote_count - other.vote_count
+    def __eq__(self, other):
+        return self.uuid - other.uuid
 
 
 def check_q():
@@ -75,7 +75,7 @@ def _play(song_data):
     global CURRENT, QUEUE, QUEUE_IDS, HISTORY, HISTORY_IDS
     if "uuid" not in song_data:
         song_data["uuid"] = str(uuid.uuid4())
-	_remove_from_q(song_data)
+    _remove_from_q(song_data)
 
     if CURRENT:
         _add_to_history(CURRENT)
@@ -106,15 +106,16 @@ def _add_to_q(song_data):
     if "uuid" not in song_data:
         song_data["uuid"] = str(uuid.uuid4())
     s_uuid = song_data["uuid"]
-    QUEUE[s_uuid] = song_data
-    QUEUE_IDS.append(QueueItem(s_uuid))
+    if not _find_song_in_queue(s_uuid):
+        QUEUE[s_uuid] = song_data
+        QUEUE_IDS.append(QueueItem(s_uuid))
 
 
 def _remove_from_q(song_data):
     global CURRENT, QUEUE, QUEUE_IDS, HISTORY, HISTORY_IDS
     s_uuid = song_data["uuid"]
     song = _find_song_in_queue(s_uuid)
-    if song in QUEUE_IDS:
+    if song is not None:
         QUEUE_IDS.remove(song)
     if s_uuid in QUEUE:
         del QUEUE[s_uuid]
@@ -133,6 +134,7 @@ def _steal_image(song_data):
     r = requests.get("https://www.google.de/search", params=payload)
     soup = BeautifulSoup(r.text)
     return soup.find("img")["src"]
+
 
 @application.get('/ping')
 def ping_get(db, merchant_id):
@@ -191,6 +193,7 @@ def users():
     response.content_type = 'application/json'
     return json.dumps(LASTFM_USER_LIST)
 
+
 @application.post('/remove_user')
 def remove_user():
     global LASTFM_USER_LIST
@@ -248,7 +251,8 @@ def voter(func):
 	song_data = json.loads(request.body.read())
 	song = _find_song_in_queue(song_data['uuid'])
         func(song)
-        QUEUE_IDS = sorted(QUEUE_IDS, reverse=True)
+        QUEUE_IDS = sorted(
+            QUEUE_IDS, key=lambda q: q.vote_count, reverse=True)
         response.content_type = 'application/json'
         return json.dumps(song.vote_count)
     return wrapper
@@ -257,12 +261,14 @@ def voter(func):
 @application.put('/voteup')
 @voter
 def vote_up(song):
+    print "Vote up song with uuid={}".format(song.uuid)
     song.vote_count += 1 
 
 
 @application.put('/votedown')
 @voter
 def vote_down(song):
+    print "Vote down song with uuid={}".format(song.uuid)
     song.vote_count -= 1
 
 
