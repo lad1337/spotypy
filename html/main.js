@@ -201,6 +201,28 @@ $(document).ready(function() {
         set_mark_request(icon);
         $.post("/play", JSON.stringify(item.data("full")), function(){check_queue(); remove_mark_request(icon);});
     });
+	
+    $(document).on('click', "#queue .glyphicon-arrow-up", function() {
+        var icon = $(this);
+        var item = icon.parent();
+	$.ajax({
+            type: "PUT", 
+            url: "/voteup", 
+            data: JSON.stringify(item.data("full")), 
+            success: function(){check_queue();}
+        });
+    });
+
+    $(document).on('click', "#queue .glyphicon-arrow-down", function() {
+        var icon = $(this);
+        var item = icon.parent();
+	$.ajax({
+            type: "PUT", 
+            url: "/votedown", 
+            data: JSON.stringify(item.data("full")), 
+            success: function(){check_queue();}
+        });
+    });
 
     $(document).on('click', ".glyphicon-star", function () {
         var item = $(this).parent();

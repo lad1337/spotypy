@@ -168,6 +168,10 @@ nav #cover{
     animation-play-state: paused
 }
 
+.voting {
+    font-weight: bold;
+}
+
 /* Make it move */
 @keyframes marquee {
     0%   { text-indent: 20em }
