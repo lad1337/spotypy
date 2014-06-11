@@ -232,8 +232,11 @@ def queue():
 
 @application.put('/queue')
 def add_queue():
+    global QUEUE_IDS
     song_data = json.loads(request.body.read())
     _add_to_q(song_data)
+    QUEUE_IDS = sorted(
+            QUEUE_IDS, key=lambda q: q.vote_count, reverse=True)
     response.content_type = 'application/json'
     return json.dumps(QUEUE)
 
