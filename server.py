@@ -245,14 +245,14 @@ def _find_song_in_queue(uuid):
     global QUEUE_IDS
     for song in QUEUE_IDS:
         if song.uuid == uuid:
-	    return song
+            return song
 
 
 def voter(func):
     def wrapper(*args, **kwargs):
         global QUEUE_IDS
-	song_data = json.loads(request.body.read())
-	song = _find_song_in_queue(song_data['uuid'])
+        song_data = json.loads(request.body.read())
+        song = _find_song_in_queue(song_data['uuid'])
         func(song)
         QUEUE_IDS = sorted(
             QUEUE_IDS, key=lambda q: q.vote_count, reverse=True)
