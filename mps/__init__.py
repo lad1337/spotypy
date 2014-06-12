@@ -17,11 +17,12 @@ if sys.version_info[:2] >= (3, 0):
     from urllib.request import build_opener
     from urllib.error import HTTPError, URLError
     from urllib.parse import urlencode
+    from urllib import quote_plus
 
 
 else:
     from urllib2 import build_opener, HTTPError, URLError
-    from urllib import urlencode
+    from urllib import urlencode, quote_plus
     import cPickle as pickle
 
 
@@ -75,8 +76,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 def dosearch(term):
     """ Perform search. """
-    url = "http://pleer.com/search?q=%s&target=tracks&page=%s"
-    url = url % (term.replace(" ", "+"), 1)
+    url = "http://pleer.com/search?q=%s&target=tracks&page=1"
+    url = url % quote_plus(term.strip())
     try:
         wdata = requests.get(url)
         songs = get_tracks_from_page(wdata.text)
