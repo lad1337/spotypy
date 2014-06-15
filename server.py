@@ -10,7 +10,6 @@ import requests
 from random import choice
 from threading import Lock
 from string import strip
-from itertools import chain
 from bottle import Bottle, static_file, response, request
 from bs4 import BeautifulSoup
 
@@ -48,6 +47,7 @@ def check_q():
             _stop()
             mps.MPLAYER = None
 
+
 def _fucking_next():
     if QUEUE_IDS and QUEUE:
         _start_song(QUEUE[QUEUE_IDS[0].uuid])
@@ -60,7 +60,6 @@ def _fucking_next():
             time.sleep(1)
         _start_song(choice(results))
         time.sleep(1)
-
 
 
 def _start_song(song_data):
@@ -120,6 +119,7 @@ def _remove_from_q(song_data):
     if s_uuid in QUEUE:
         del QUEUE[s_uuid]
 
+
 def _lastfm(user_name):
     url = 'http://ws.audioscrobbler.com/1.0/user/{}/recenttracks.rss'.format(user_name)
     print "feed url: {}".format(url)
@@ -137,7 +137,7 @@ def _steal_image(song_data):
 
 
 @application.get('/ping')
-def ping_get(db, merchant_id):
+def ping_get():
     return {'reply': 'pong'}
 
 
@@ -232,8 +232,11 @@ def queue():
 
 @application.put('/queue')
 def add_queue():
+    global QUEUE_IDS
     song_data = json.loads(request.body.read())
     _add_to_q(song_data)
+    QUEUE_IDS = sorted(
+            QUEUE_IDS, key=lambda q: q.vote_count, reverse=True)
     response.content_type = 'application/json'
     return json.dumps(QUEUE)
 
@@ -242,14 +245,14 @@ def _find_song_in_queue(uuid):
     global QUEUE_IDS
     for song in QUEUE_IDS:
         if song.uuid == uuid:
-	    return song
+            return song
 
 
 def voter(func):
     def wrapper(*args, **kwargs):
         global QUEUE_IDS
-	song_data = json.loads(request.body.read())
-	song = _find_song_in_queue(song_data['uuid'])
+        song_data = json.loads(request.body.read())
+        song = _find_song_in_queue(song_data['uuid'])
         func(song)
         QUEUE_IDS = sorted(
             QUEUE_IDS, key=lambda q: q.vote_count, reverse=True)
@@ -303,6 +306,7 @@ def pause():
 @application.get('/next')
 def next():
     _fucking_next()
+
 
 @application.get('/prev')
 def prev():

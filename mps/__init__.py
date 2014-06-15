@@ -9,27 +9,21 @@ import mpylayer
 
 mswin = os.name == "nt"
 
-from urllib2 import urlopen, HTTPError
+from urllib2 import urlopen
 
 if sys.version_info[:2] >= (3, 0):
     # pylint: disable=E0611,F0401
-    import pickle
     from urllib.request import build_opener
-    from urllib.error import HTTPError, URLError
-    from urllib.parse import urlencode
+    from urllib import quote_plus
 
 
 else:
-    from urllib2 import build_opener, HTTPError, URLError
-    from urllib import urlencode
-    import cPickle as pickle
-
+    from urllib2 import build_opener
+    from urllib import quote_plus
 
 
 def search(artist, song_title=""):
     print u"searching for: {} - {}".format(unicode(artist), unicode(song_title))
-    found_songs = []
-    bitrates = []
 
     return dosearch(u"{} {}".format(unicode(artist), unicode(song_title)))
     best_song = None
@@ -47,8 +41,6 @@ def search(artist, song_title=""):
         return []
 
     return found_songs
-
-
 
 # parts of pms where used to make this
 """
@@ -73,10 +65,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
+
 def dosearch(term):
     """ Perform search. """
-    url = "http://pleer.com/search?q=%s&target=tracks&page=%s"
-    url = url % (term.replace(" ", "+"), 1)
+    url = "http://pleer.com/search?q=%s&target=tracks&page=1"
+    url = url % quote_plus(term.strip())
     try:
         wdata = requests.get(url)
         songs = get_tracks_from_page(wdata.text)
