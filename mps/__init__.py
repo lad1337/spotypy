@@ -9,28 +9,21 @@ import mpylayer
 
 mswin = os.name == "nt"
 
-from urllib2 import urlopen, HTTPError
+from urllib2 import urlopen
 
 if sys.version_info[:2] >= (3, 0):
     # pylint: disable=E0611,F0401
-    import pickle
     from urllib.request import build_opener
-    from urllib.error import HTTPError, URLError
-    from urllib.parse import urlencode
     from urllib import quote_plus
 
 
 else:
-    from urllib2 import build_opener, HTTPError, URLError
-    from urllib import urlencode, quote_plus
-    import cPickle as pickle
-
+    from urllib2 import build_opener
+    from urllib import quote_plus
 
 
 def search(artist, song_title=""):
     print u"searching for: {} - {}".format(unicode(artist), unicode(song_title))
-    found_songs = []
-    bitrates = []
 
     return dosearch(u"{} {}".format(unicode(artist), unicode(song_title)))
     best_song = None
@@ -48,8 +41,6 @@ def search(artist, song_title=""):
         return []
 
     return found_songs
-
-
 
 # parts of pms where used to make this
 """
@@ -73,6 +64,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
+
 
 def dosearch(term):
     """ Perform search. """
