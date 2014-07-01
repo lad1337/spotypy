@@ -23,9 +23,10 @@ else:
 
 
 def search(artist, song_title=""):
-    print u"searching for: {} - {}".format(unicode(artist), unicode(song_title))
-
-    return dosearch(u"{} {}".format(unicode(artist), unicode(song_title)))
+    print u"searching for: {} - {}".format(unicode(artist, encoding='utf-8'), unicode(song_title, encoding='utf-8'))
+    search_term = u"{} {}".format(unicode(artist, encoding='utf-8'), unicode(song_title, encoding='utf-8'))
+    
+    return dosearch(search_term.encode('utf8'))
     best_song = None
     best_song_score = (0, 0)
     for song_version in song_versions:
