@@ -13,9 +13,6 @@ from string import strip
 from bottle import Bottle, static_file, response, request
 from bs4 import BeautifulSoup
 
-import sys
-sys.setdefaultencoding("utf-8")
-
 application = Bottle()
 
 HISTORY = {}
