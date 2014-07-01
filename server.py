@@ -13,6 +13,12 @@ from string import strip
 from bottle import Bottle, static_file, response, request
 from bs4 import BeautifulSoup
 
+# ugly workaround for print on non utf-8 shells
+# http://stackoverflow.com/questions/11741574/how-to-print-utf-8-encoded-text-to-the-console-in-python-3
+import sys, codecs, locale
+sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
+sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr)
+
 application = Bottle()
 
 HISTORY = {}
