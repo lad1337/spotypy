@@ -56,7 +56,7 @@ def _fucking_next():
         results = None
         while not results:
             r_song = choice(choice(map(_lastfm, LASTFM_USER_LIST)))
-            results = mps.search(*map(strip, r_song.split("-")))
+            results = mps.search(*r_song.split("-"))
             time.sleep(1)
         _start_song(choice(results))
         time.sleep(1)
@@ -122,13 +122,13 @@ def _remove_from_q(song_data):
 
 def _lastfm(user_name):
     url = 'http://ws.audioscrobbler.com/1.0/user/{}/recenttracks.rss'.format(user_name)
-    print "feed url: {}".format(url)
+    print u"feed url: {}".format(url)
     d = feedparser.parse(url)
     return [i.title for i in d.entries]
 
 
 def _steal_image(song_data):
-    term = "{singer} {song} album cover".format(**song_data)
+    term = u"{singer} {song} album cover".format(**song_data)
     # https://www.google.de/search?q=Emil+Bulls+-+Here+Comes+the+Fire&tbm=isch
     payload = {"tbm": "isch", "q": term}
     r = requests.get("https://www.google.de/search", params=payload)
@@ -152,21 +152,23 @@ def files(filename):
 
 
 @application.get('/search')
-def index():
+def search():
     params = bottle.request.params
     result = []
     if params["term"].startswith("fm"):
         for song in _lastfm(params["term"].split()[1].strip()):
+            song = unicode(song, encoding='utf-8')
             _results = mps.search(*map(strip, song.split("-")))
             if _results:
                 result.append(_results[0])
     else:
-        result = mps.search(params["term"])
+        result = mps.search(unicode(params["term"], encoding='utf-8'))
     for r in result:
         if not "uuid" in r:
             r["uuid"] = str(uuid.uuid4())
     response.content_type = 'application/json'
     return json.dumps(result)
+
 
 
 @application.post('/play')
@@ -345,5 +347,7 @@ def set_stats():
 
 if __name__ == "__main__":
     import bottle
+    import argparse
+
     bottle.run(application, host="0.0.0.0", port="9000", reloader=True)
 

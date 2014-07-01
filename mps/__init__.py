@@ -22,11 +22,11 @@ else:
     from urllib import quote_plus
 
 
-def search(artist, song_title=""):
-    print u"searching for: {} - {}".format(unicode(artist, encoding='utf-8'), unicode(song_title, encoding='utf-8'))
-    search_term = u"{} {}".format(unicode(artist, encoding='utf-8'), unicode(song_title, encoding='utf-8'))
+def search(artist, song_title=u""):
+    print u"searching for: {} - {}".format(artist, song_title)
+    search_term = u"{} {}".format(artist, song_title)
     
-    return dosearch(search_term.encode('utf8'))
+    return dosearch(search_term)
     best_song = None
     best_song_score = (0, 0)
     for song_version in song_versions:
@@ -69,10 +69,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 def dosearch(term):
     """ Perform search. """
-    url = "http://pleer.com/search?q=%s&target=tracks&page=1"
-    url = url % quote_plus(term.strip())
+    url = "http://pleer.com/search"
     try:
-        wdata = requests.get(url)
+        wdata = requests.get(url, params={"q": term, "target": "track", "page": 1})
         songs = get_tracks_from_page(wdata.text)
         if songs:
             return songs
