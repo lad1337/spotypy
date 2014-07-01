@@ -5,6 +5,8 @@ import json
 import os
 import sys
 import mpylayer
+import logging
+logger = logging.getLogger("mps")
 
 
 mswin = os.name == "nt"
@@ -23,7 +25,7 @@ else:
 
 
 def search(artist, song_title=u""):
-    print(u"searching for: {} - {}".format(artist, song_title))
+    logging.debug(u"searching for: {} - {}".format(artist, song_title))
     search_term = u"{} {}".format(artist, song_title)
     
     return dosearch(search_term)

@@ -13,11 +13,9 @@ from string import strip
 from bottle import Bottle, static_file, response, request
 from bs4 import BeautifulSoup
 
-# ugly workaround for print on non utf-8 shells
-# http://stackoverflow.com/questions/11741574/how-to-print-utf-8-encoded-text-to-the-console-in-python-3
-import sys, codecs, locale
-sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
-sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr)
+import logging
+import sys
+logger = logging.getLogger("spotypy")
 
 
 application = Bottle()
@@ -49,7 +47,6 @@ def check_q():
         if not mps.MPLAYER:
             _fucking_next()
             return
-        #print "percent_pos: {}".format(mps.MPLAYER.percent_pos)
         if mps.MPLAYER.percent_pos > 98:
             _stop()
             mps.MPLAYER = None
@@ -70,7 +67,7 @@ def _fucking_next():
 
 
 def _start_song(song_data):
-    print(u"starting song {singer} - {song} {duration}".format(**song_data))
+    logging.debug(u"starting song {singer} - {song} {duration}".format(**song_data))
     result = mps.playsong(song_data)
     if result:
         _play(song_data)
@@ -129,7 +126,7 @@ def _remove_from_q(song_data):
 
 def _lastfm(user_name):
     url = 'http://ws.audioscrobbler.com/1.0/user/{}/recenttracks.rss'.format(user_name)
-    print(u"feed url: {}".format(url))
+    logging.debug(u"feed url: {}".format(url))
     d = feedparser.parse(url)
     return [i.title for i in d.entries]
 
@@ -273,14 +270,14 @@ def voter(func):
 @application.put('/voteup')
 @voter
 def vote_up(song):
-    print("Vote up song with uuid={}".format(song.uuid))
+    logging.debug("Vote up song with uuid={}".format(song.uuid))
     song.vote_count += 1 
 
 
 @application.put('/votedown')
 @voter
 def vote_down(song):
-    print("Vote down song with uuid={}".format(song.uuid))
+    logging.debug("Vote down song with uuid={}".format(song.uuid))
     song.vote_count -= 1
 
 
@@ -355,6 +352,13 @@ def set_stats():
 if __name__ == "__main__":
     import bottle
     import argparse
+
+    logging.basicConfig()
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    root.addHandler(ch)
 
     bottle.run(application, host="0.0.0.0", port="9000", reloader=True)
 
