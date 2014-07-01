@@ -13,6 +13,9 @@ from string import strip
 from bottle import Bottle, static_file, response, request
 from bs4 import BeautifulSoup
 
+import sys
+sys.setdefaultencoding("utf-8")
+
 application = Bottle()
 
 HISTORY = {}
@@ -63,7 +66,7 @@ def _fucking_next():
 
 
 def _start_song(song_data):
-    print u"starting song {singer} - {song} {duration}".format(**song_data)
+    print(u"starting song {singer} - {song} {duration}".format(**song_data))
     result = mps.playsong(song_data)
     if result:
         _play(song_data)
@@ -122,7 +125,7 @@ def _remove_from_q(song_data):
 
 def _lastfm(user_name):
     url = 'http://ws.audioscrobbler.com/1.0/user/{}/recenttracks.rss'.format(user_name)
-    print u"feed url: {}".format(url)
+    print(u"feed url: {}".format(url))
     d = feedparser.parse(url)
     return [i.title for i in d.entries]
 
@@ -266,14 +269,14 @@ def voter(func):
 @application.put('/voteup')
 @voter
 def vote_up(song):
-    print "Vote up song with uuid={}".format(song.uuid)
+    print("Vote up song with uuid={}".format(song.uuid))
     song.vote_count += 1 
 
 
 @application.put('/votedown')
 @voter
 def vote_down(song):
-    print "Vote down song with uuid={}".format(song.uuid)
+    print("Vote down song with uuid={}".format(song.uuid))
     song.vote_count -= 1
 
 
