@@ -19,6 +19,7 @@ import sys, codecs, locale
 sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr)
 
+
 application = Bottle()
 
 HISTORY = {}
