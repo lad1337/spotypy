@@ -4,7 +4,8 @@ function check_percent(){
     $.getJSON("/percent", function(res){
         if(res.percent < 3)
             check_queue();
-        $("nav .progress-bar").css("width", res.percent + "%");
+        if(res.percent)
+            $("nav .progress-bar").css("width", res.percent + "%");
     });
 }
 
