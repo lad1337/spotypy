@@ -4,7 +4,6 @@ import os
 import json
 import uuid
 import time
-import mps
 import feedparser
 import requests
 from random import choice
@@ -12,8 +11,10 @@ from threading import Lock
 from string import strip
 from bottle import Bottle, static_file, response, request
 from bs4 import BeautifulSoup
+import mpd
 
-application = Bottle()
+mpc_server = "localhost"
+mpc_port = 6600
 
 HISTORY = {}
 HISTORY_IDS = []
@@ -24,6 +25,10 @@ QUEUE_IDS = []
 LASTFM_USER_LIST = []
 
 q_lock = Lock()
+
+application = Bottle()
+mpd = mpd.MakeClient()
+mpd.connect(mpc_server, mpc_port)
 
 
 class QueueItem(object):
@@ -42,7 +47,6 @@ def check_q():
         if not mps.MPLAYER:
             _fucking_next()
             return
-        #print "percent_pos: {}".format(mps.MPLAYER.percent_pos)
         if mps.MPLAYER.percent_pos > 98:
             _stop()
             mps.MPLAYER = None
