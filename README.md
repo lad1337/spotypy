@@ -3,18 +3,18 @@ spotypy
 
 ##How to install##
 
-# prerequisites
+### prerequisites ###
 spotypy needs a running mpc server.
 
-```sudo apt-get install mpd
-
+```sh
+sudo apt-get install mpd
 ```
 
 Please refer to mpc docs for further instruction for more exotic server OS
 
 todo: add more detailed plugin setup here
 
-Edit /etc/mpd.conf and add this
+Edit `/etc/mpd.conf` and add this
 
 ```
 input {
@@ -27,8 +27,7 @@ input {
 }
 ```
 
-
-# all
+## all ##
 ```sh
 virtualenv env
 . env/bin/activate
