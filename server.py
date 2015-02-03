@@ -67,6 +67,8 @@ def _start_song(song_data):
     result = mps.playsong(song_data)
     if result:
         _play(song_data)
+    else:
+        _remove_from_q(song_data)
     return result
 
 
