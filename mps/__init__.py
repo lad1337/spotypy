@@ -7,7 +7,7 @@ import sys
 from mpd import MPDClient
 
 MPD = MPDClient()
-MPD.connect("localhost", 6600)
+MPD.connect("localhost", 6660)
 
 
 mswin = os.name == "nt"
