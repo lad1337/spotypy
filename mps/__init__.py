@@ -203,20 +203,3 @@ def status():
 
     return MPD.status()
 
-
-    data = {"length": MPLAYER.length,
-            "mute": MPLAYER.mute,
-            "samplerate": MPLAYER.samplerate,
-            "time_pos": MPLAYER.time_pos,
-            "volume": MPLAYER.volume,
-            "speed": MPLAYER.speed,
-            "percent_pos": MPLAYER.percent_pos,
-            "meta": {"album": MPLAYER.meta_album,
-                     "artist": MPLAYER.meta_artist,
-                     "title": MPLAYER.meta_title,
-                     "track": MPLAYER.meta_track,
-                     "year": MPLAYER.meta_year,
-
-            }
-    }
-    return data

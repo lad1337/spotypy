@@ -276,7 +276,7 @@ def vote_down(song):
     print "Vote down song with uuid={}".format(song.uuid)
     song.vote_count -= 1
     if song.vote_count <= -10:
-        _remove_from_q(song)
+        _remove_from_q(dict(uuid=song.uuid))
 
 
 @application.get('/play')
