@@ -256,6 +256,9 @@ def voter(func):
         song_data = json.loads(request.body.read())
         song = _find_song_in_queue(song_data['uuid'])
         func(song)
+        if song.vote_count <= -10:
+            _remove_from_q(song_data)
+
         QUEUE_IDS = sorted(
             QUEUE_IDS, key=lambda q: q.vote_count, reverse=True)
         response.content_type = 'application/json'
@@ -275,8 +278,6 @@ def vote_up(song):
 def vote_down(song):
     print "Vote down song with uuid={}".format(song.uuid)
     song.vote_count -= 1
-    if song.vote_count <= -10:
-        _remove_from_q(dict(uuid=uuid.uuid4(song.uuid)))
 
 
 @application.get('/play')
