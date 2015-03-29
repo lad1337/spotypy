@@ -54,20 +54,25 @@ def _fucking_next():
         time.sleep(1)
 
 
-def _start_song(song_data):
+def add_last_fm_songs():
     auto_queue_length = 10
-    print u"starting song {singer} - {song} {duration}".format(**song_data)
-    result = mps.playsong(song_data)
-    if result:
-        _play(song_data)
-        if LASTFM_USER_LIST and len(QUEUE) < auto_queue_length:
+
+    if LASTFM_USER_LIST and len(QUEUE) < auto_queue_length:
+        for x in range (len(QUEUE), auto_queue_length):
             results = None
             while not results:
                 r_song = choice(choice(map(_lastfm, LASTFM_USER_LIST)))
                 results = mps.search(*r_song.split("-"))
                 time.sleep(1)
-            for x in range (len(QUEUE), auto_queue_length):
-                _add_to_q(choice(results))
+            _add_to_q(choice(results))
+
+
+def _start_song(song_data):
+    print u"starting song {singer} - {song} {duration}".format(**song_data)
+    result = mps.playsong(song_data)
+    if result:
+        _play(song_data)
+        add_last_fm_songs()
 
     else:
         _remove_from_q(song_data)
@@ -189,8 +194,10 @@ def user():
     user_name = json.loads(request.body.read()).get("user_name", 0)
     if user_name and user_name not in LASTFM_USER_LIST:
         LASTFM_USER_LIST.append(user_name)
+    add_last_fm_songs()
     response.content_type = 'application/json'
     return json.dumps(LASTFM_USER_LIST)
+
 
 
 @application.get('/users')
@@ -353,4 +360,4 @@ if __name__ == "__main__":
     import bottle
     import argparse
 
-    bottle.run(application, host="0.0.0.0", port="9000", reloader=True)
+    bottle.run(application, host="0.0.0.0", port="9001", reloader=True)
