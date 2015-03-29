@@ -135,19 +135,30 @@ form.col-md-4:after{
     1px 1px 0 #96c93c;
 }
 
-nav #cover{
-    height: 50px;
-    width: 50px;
+#cover{
+    height: 200px;
+    width: 200px;
+    margin-left:20%;
+    margin-top:15px;
     position: relative;
     background-size: cover;
     background-repeat:no-repeat;
+}
+
+@media (min-width: 768px) {
+    #cover {
+        height: 50px;
+        width: 50px;
+        margin-left:0px;
+        margin-top:0px
+    }
 }
 
 /* http://jsfiddle.net/jonathansampson/XxUXD/ */
 /* Make it a marquee */
 .marquee {
     float:left;
-    width: 260px;
+    width: 360px;
     margin: 0 auto;
     overflow: hidden;
     white-space: nowrap;
