@@ -1,5 +1,4 @@
 .progress-container{
-    width: 300px;
     margin-top: 15px;
 }
 
@@ -14,6 +13,10 @@
 
 .col-md-4 .row{
     margin-right: 0;
+}
+
+.player-control {
+  text-align: center;
 }
 
 #queue ul,
@@ -62,25 +65,13 @@ nav li.player-control.volume a{
 }
 
 nav form.navbar-form.navbar-right{
-    width: 25%;
     margin-right: 0 !important;
 }
 
-#queue ul:after{
-    content: "Queue";
-    float: right;
-    opacity: 0.5;
+#search-results {
+    margin-top:10px
 }
-#history ul:after{
-    content: "History";
-    float: right;
-    opacity: 0.5;
-}
-#search-results ul:after{
-    content: "Search Results";
-    float: right;
-    opacity: 0.5;
-}
+
 #favorites ul:after{
     content: "Favorites";
     float: right;
@@ -147,7 +138,6 @@ form.col-md-4:after{
 nav #cover{
     height: 50px;
     width: 50px;
-    margin-left: -30px;
     position: relative;
     background-size: cover;
     background-repeat:no-repeat;
@@ -156,7 +146,8 @@ nav #cover{
 /* http://jsfiddle.net/jonathansampson/XxUXD/ */
 /* Make it a marquee */
 .marquee {
-    width: 280px;
+    float:left;
+    width: 260px;
     margin: 0 auto;
     overflow: hidden;
     white-space: nowrap;
@@ -176,4 +167,8 @@ nav #cover{
 @keyframes marquee {
     0%   { text-indent: 20em }
     100% { text-indent: -8em }
+}
+
+.well > h3 {
+    margin-top:0px;
 }
