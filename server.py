@@ -39,13 +39,11 @@ class QueueItem(object):
 def check_q():
     global CURRENT, QUEUE, QUEUE_IDS, HISTORY, HISTORY_IDS, q_lock
     with q_lock:
-        if not mps.MPLAYER:
+        if mps.status()["state"] == "stop":
             _fucking_next()
             return
-        #print "percent_pos: {}".format(mps.MPLAYER.percent_pos)
-        if mps.MPLAYER.percent_pos > 98:
+        if _percent() > 98:
             _stop()
-            mps.MPLAYER = None
 
 
 def _fucking_next():
@@ -99,7 +97,7 @@ def _add_to_history(son_data):
     HISTORY_IDS.append(CURRENT["uuid"])
     if len(HISTORY_IDS) > 10:
         HISTORY_IDS = HISTORY_IDS[1:]
-        HISTORY = {uuid:HISTORY[uuid] for uuid in HISTORY_IDS}
+        HISTORY = {uuid: HISTORY[uuid] for uuid in HISTORY_IDS}
 
 
 def _add_to_q(song_data):
@@ -240,7 +238,7 @@ def add_queue():
     song_data = json.loads(request.body.read())
     _add_to_q(song_data)
     QUEUE_IDS = sorted(
-            QUEUE_IDS, key=lambda q: q.vote_count, reverse=True)
+        QUEUE_IDS, key=lambda q: q.vote_count, reverse=True)
     response.content_type = 'application/json'
     return json.dumps(QUEUE)
 
@@ -258,6 +256,9 @@ def voter(func):
         song_data = json.loads(request.body.read())
         song = _find_song_in_queue(song_data['uuid'])
         func(song)
+        if song.vote_count <= -10:
+            _remove_from_q(song_data)
+
         QUEUE_IDS = sorted(
             QUEUE_IDS, key=lambda q: q.vote_count, reverse=True)
         response.content_type = 'application/json'
@@ -322,8 +323,6 @@ def prev():
 @application.get('/status')
 def status():
     response.content_type = 'application/json'
-    if not mps.MPLAYER:
-        return json.dumps({})
     return json.dumps(mps.status())
 
 
@@ -331,18 +330,24 @@ def status():
 def percent():
     check_q()
     response.content_type = 'application/json'
-    if not mps.MPLAYER:
-        return json.dumps({"percent": 0})
-    return json.dumps({"percent": mps.MPLAYER.percent_pos})
+    return json.dumps({"percent": _percent()})
+
+
+def _percent():
+    if not CURRENT:
+        return 0
+    status = mps.MPD.status()
+    elapsed = float(status["elapsed"])
+    duration_min, duration_sec_part = CURRENT["duration"].split(":")
+    duration_sec = (int(duration_min) * 60) + int(duration_sec_part)
+    return (elapsed / duration_sec) * 100
 
 
 @application.post('/status')
 def set_stats():
     status = json.loads(request.body.read())
-    if not mps.MPLAYER:
-        return json.dumps({})
     for key, value in status.items():
-        setattr(mps.MPLAYER, key, value)
+        getattr(mps.MPD, key)(value)
     response.content_type = 'application/json'
     return json.dumps({})
 
@@ -350,6 +355,13 @@ def set_stats():
 if __name__ == "__main__":
     import bottle
     import argparse
-
-    bottle.run(application, host="0.0.0.0", port="9000", reloader=True)
-
+    try:
+        bottle.run(application, host="0.0.0.0", port="9000", reloader=True)
+    except:
+        raise
+    finally:
+        try:
+            mps.MPD.stop()
+            mps.MPD.close()
+        except:
+            pass

@@ -141,7 +141,7 @@ $(document).ready(function() {
         volume -= 5;
         if(volume < 0)
             volume = 0;
-        $.post("/status", JSON.stringify({volume: volume}),function(){
+        $.post("/status", JSON.stringify({setvol: volume}),function(){
             check_queue();
             $(".player-control.volume").data("volume", volume);
             remove_mark_request(icon);
@@ -154,7 +154,7 @@ $(document).ready(function() {
         volume += 5;
         if(volume >= 100)
             volume = 100;
-        $.post("/status", JSON.stringify({volume: volume}),function(){
+        $.post("/status", JSON.stringify({setvol: volume}),function(){
             check_queue();
             $(".player-control.volume").data("volume", volume);
             remove_mark_request(icon);

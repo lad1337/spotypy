@@ -4,7 +4,10 @@ import re
 import json
 import os
 import sys
-import mpylayer
+from mpd import MPDClient
+
+MPD = MPDClient()
+MPD.connect("localhost", 6660)
 
 
 mswin = os.name == "nt"
@@ -175,38 +178,28 @@ def playsong(song, failcount=0):
         cl = opener.open(track_url, timeout=5).headers['content-length']
     except (IOError, KeyError):
         return False
-
-    global MPLAYER
-    MPLAYER = None
-    MPLAYER = mpylayer.MPlayerControl(extra_args=["prefer-ipv4", track_url])
+    MPD.clear()
+    MPD.add(track_url)
+    MPD.play(0)
+    MPD.consume(1)
     return True
 
+
 def stop():
-    if not MPLAYER:
-        return
-    MPLAYER.stop()
+    MPD.stop()
+
 
 def pause_pause():
-    if not MPLAYER:
-        return
-    return MPLAYER.pause()
+    return MPD.pause()
 
 
 # https://code.google.com/p/mpylayer/wiki/AvailableCommandsAndProperties
 def status():
-    data = {"length": MPLAYER.length,
-            "mute": MPLAYER.mute,
-            "samplerate": MPLAYER.samplerate,
-            "time_pos": MPLAYER.time_pos,
-            "volume": MPLAYER.volume,
-            "speed": MPLAYER.speed,
-            "percent_pos": MPLAYER.percent_pos,
-            "meta": {"album": MPLAYER.meta_album,
-                     "artist": MPLAYER.meta_artist,
-                     "title": MPLAYER.meta_title,
-                     "track": MPLAYER.meta_track,
-                     "year": MPLAYER.meta_year,
 
-            }
-    }
-    return data
+    # MPD.currentsong()
+    #{'pos': '0', 'file': 'http://s2.pleer.com/0548f7a7af36579d7939cbe4cf02ac66ceece84879889383e7566a9ea253905dd46294616577f1df5f4fc68c705e9d0a1a9e4d6b29de0d0680548c40b550d36f11389b6817281a521cebbb5bbd4edf5568/8be52443b3.mp3', 'id': '3'}
+    # MPD.status()
+    # {'songid': '3', 'playlistlength': '1', 'playlist': '8', 'repeat': '0', 'consume': '1', 'mixrampdb': '0.000000', 'random': '0', 'state': 'play', 'elapsed': '29.466', 'volume': '-1', 'single': '0', 'time': '29:224', 'song': '0', 'audio': '44100:16:2', 'bitrate': '186'}
+
+    return MPD.status()
+
