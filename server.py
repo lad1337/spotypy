@@ -27,7 +27,7 @@ q_lock = Lock()
 
 
 class QueueItem(object):
-    
+
     def __init__(self, uuid, vote_count=0):
         self.uuid = uuid
         self.vote_count = vote_count
@@ -52,14 +52,19 @@ def _fucking_next():
     if QUEUE_IDS and QUEUE:
         _start_song(QUEUE[QUEUE_IDS[0].uuid])
         time.sleep(1)
-    elif LASTFM_USER_LIST:
-        results = None
-        while not results:
-            r_song = choice(choice(map(_lastfm, LASTFM_USER_LIST)))
-            results = mps.search(*r_song.split("-"))
-            time.sleep(1)
-        _start_song(choice(results))
-        time.sleep(1)
+
+
+def add_last_fm_songs():
+    auto_queue_length = 10
+
+    if LASTFM_USER_LIST and len(QUEUE) < auto_queue_length:
+        for x in range (len(QUEUE), auto_queue_length):
+            results = None
+            while not results:
+                r_song = choice(choice(map(_lastfm, LASTFM_USER_LIST)))
+                results = mps.search(*r_song.split("-"))
+                time.sleep(1)
+            _add_to_q(choice(results))
 
 
 def _start_song(song_data):
@@ -67,6 +72,8 @@ def _start_song(song_data):
     result = mps.playsong(song_data)
     if result:
         _play(song_data)
+        add_last_fm_songs()
+
     else:
         _remove_from_q(song_data)
     return result
@@ -187,8 +194,10 @@ def user():
     user_name = json.loads(request.body.read()).get("user_name", 0)
     if user_name and user_name not in LASTFM_USER_LIST:
         LASTFM_USER_LIST.append(user_name)
+    add_last_fm_songs()
     response.content_type = 'application/json'
     return json.dumps(LASTFM_USER_LIST)
+
 
 
 @application.get('/users')
@@ -263,13 +272,13 @@ def voter(func):
         response.content_type = 'application/json'
         return json.dumps(song.vote_count)
     return wrapper
-        
+
 
 @application.put('/voteup')
 @voter
 def vote_up(song):
     print "Vote up song with uuid={}".format(song.uuid)
-    song.vote_count += 1 
+    song.vote_count += 1
 
 
 @application.put('/votedown')
@@ -352,4 +361,3 @@ if __name__ == "__main__":
     import argparse
 
     bottle.run(application, host="0.0.0.0", port="9000", reloader=True)
-
