@@ -6,9 +6,15 @@ import os
 import sys
 from mpd import MPDClient
 
-MPD = MPDClient()
-MPD.connect("localhost", 6660)
+MPD = None
 
+
+def setup_mpd():
+    global MPD
+    MPD = MPDClient()
+    MPD.connect("localhost", 6660)
+
+setup_mpd()
 
 mswin = os.name == "nt"
 
@@ -30,21 +36,6 @@ def search(artist, song_title=u""):
     search_term = u"{} {}".format(artist, song_title)
     
     return dosearch(search_term)
-    best_song = None
-    best_song_score = (0, 0)
-    for song_version in song_versions:
-        rate = song_version["rate_int"]
-        size = song_version["size"]
-        if (size, rate) > best_song_score:
-            best_song_score = (size, rate)
-            best_song = song_version
-    if best_song:
-        found_songs.append(best_song)
-        bitrates.append(best_song["rate_int"])
-    else:
-        return []
-
-    return found_songs
 
 # parts of pms where used to make this
 """
@@ -113,6 +104,7 @@ def get_tracks_from_page(page):
         return False
     return songs
 
+
 def get_average_bitrate(song):
     """ calculate average bitrate of VBR tracks. """
     if song["rate"] == "VBR":
@@ -127,6 +119,7 @@ def get_average_bitrate(song):
 
     return song
 
+
 def tidy(raw, field):
     """ Tidy HTML entities, format songlength if field is duration.  """
     if field == "duration":
@@ -140,7 +133,7 @@ def tidy(raw, field):
 
 def get_stream(song):
     """ Return the url for a song. """
-    if not "track_url" in song:
+    if "track_url" not in song:
         url = 'http://pleer.com/site_api/files/get_url?action=download&id=%s'
         url = url % song['link']
         try:
@@ -178,10 +171,18 @@ def playsong(song, failcount=0):
         cl = opener.open(track_url, timeout=5).headers['content-length']
     except (IOError, KeyError):
         return False
-    MPD.clear()
-    MPD.add(track_url)
-    MPD.play(0)
-    MPD.consume(1)
+
+    def play(track_url_):
+        MPD.clear()
+        MPD.add(track_url_)
+        MPD.play(0)
+        MPD.consume(1)
+    try:
+        play(track_url)
+    except:
+        setup_mpd()
+        play(track_url)
+
     return True
 
 
@@ -195,11 +196,4 @@ def pause_pause():
 
 # https://code.google.com/p/mpylayer/wiki/AvailableCommandsAndProperties
 def status():
-
-    # MPD.currentsong()
-    #{'pos': '0', 'file': 'http://s2.pleer.com/0548f7a7af36579d7939cbe4cf02ac66ceece84879889383e7566a9ea253905dd46294616577f1df5f4fc68c705e9d0a1a9e4d6b29de0d0680548c40b550d36f11389b6817281a521cebbb5bbd4edf5568/8be52443b3.mp3', 'id': '3'}
-    # MPD.status()
-    # {'songid': '3', 'playlistlength': '1', 'playlist': '8', 'repeat': '0', 'consume': '1', 'mixrampdb': '0.000000', 'random': '0', 'state': 'play', 'elapsed': '29.466', 'volume': '-1', 'single': '0', 'time': '29:224', 'song': '0', 'audio': '44100:16:2', 'bitrate': '186'}
-
     return MPD.status()
-
