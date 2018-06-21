@@ -138,7 +138,10 @@ def _steal_image(song_data):
     payload = {"tbm": "isch", "q": term}
     r = requests.get("https://www.google.de/search", params=payload)
     soup = BeautifulSoup(r.text)
-    return soup.find("img")["src"]
+    img = soup.find("img")
+    if img is None:
+        return ""
+    return img["src"]
 
 
 @application.get('/ping')
