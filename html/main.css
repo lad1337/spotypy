@@ -81,6 +81,7 @@ nav form.navbar-form.navbar-right{
     float: right;
     opacity: 0.5;
 }
+
 #favorites ul:after{
     content: "Favorites";
     float: right;
@@ -111,7 +112,7 @@ form.col-md-4{
 
 .col-md-4 .title{
     display: inline-block;
-    width: calc(100% - 94px);
+    width: calc(100% - 120px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
