@@ -6,11 +6,12 @@ import os
 import sys
 from mpd import MPDClient
 
+
 MPD = MPDClient()
-MPD.connect("localhost", 6660)
-
-
+MPD.connect("localhost", 6600)
 mswin = os.name == "nt"
+current_milli_time = lambda: int(round(time.time() * 1000))
+UA = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)"
 
 from urllib2 import urlopen
 
@@ -69,49 +70,44 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
+def as_json(text):
+    startidx = text.find('(')
+    endidx = text.rfind(')')
+    return json.loads(text[startidx + 1:endidx])
+
 
 def dosearch(term):
     """ Perform search. """
-    url = "http://pleer.com/search"
+    # https://databrainz.com/api/search_api.cgi?jsoncallback=jQuery1111010430388749936614_1529588452356&qry=mario&format=json&mh=50&where=mpl&r=&y=0721190802155c415d5c405d5d445f5d435455475854495f5b465d59&_=1529588452358
+    url = "https://databrainz.com/api/search_api.cgi"
     try:
-        wdata = requests.get(url, params={"q": term, "target": "track", "page": 1})
-        songs = get_tracks_from_page(wdata.text)
-        if songs:
-            return songs
-        else:
-            return []
-    except Exception:
+        wdata = requests.get(url, params={
+            "format": "json",
+            "jsoncallback": "jQuery1111010430388749936614_1529588452356",
+            "mh": 50,
+            "qry": term.strip(),
+            "where": "mpl",
+            '_': current_milli_time(),
+        })
+
+        search = as_json(wdata.text)
+        songs = []
+        for song in search['results']:
+            songs.append({
+                'duration': song['time'],
+                'size': int(float(song['size'])),
+                'file_id': song['url'],
+                'singer': song['artist'],
+                'song': song['title'],
+                'albumart': song['albumart'],
+                'album': song['album'],
+            })
+
+        return songs
+    except Exception as e:
+        print e
         return []
 
-
-def get_tracks_from_page(page):
-    """ Get search results from web page. """
-    fields = "duration file_id singer song link rate size source".split()
-    matches = re.findall(r"\<li.(duration[^>]+)\>", page)
-    songs = []
-    if matches:
-        for song in matches:
-            cursong = {}
-            for f in fields:
-                v = re.search(r'%s=\"([^"]+)"' % f, song)
-                if v:
-                    cursong[f] = tidy(v.group(1), f)
-                    cursong["R" + f] = v.group(1)
-                else:
-                    break
-            else:
-                try:
-                    cursong = get_average_bitrate(cursong)
-                except ValueError: # cant convert rate to int: invalid literal for int() with base 10: '96 K'
-                    continue
-                # u'4.514 Mb'
-                cursong['size'] = int(float(cursong['size'][:3]) * 1024.0 * 1024.0)
-                songs.append(cursong)
-                continue
-
-    else:
-        return False
-    return songs
 
 def get_average_bitrate(song):
     """ calculate average bitrate of VBR tracks. """
@@ -127,6 +123,7 @@ def get_average_bitrate(song):
 
     return song
 
+
 def tidy(raw, field):
     """ Tidy HTML entities, format songlength if field is duration.  """
     if field == "duration":
@@ -140,25 +137,25 @@ def tidy(raw, field):
 
 def get_stream(song):
     """ Return the url for a song. """
-    if not "track_url" in song:
-        url = 'http://pleer.com/site_api/files/get_url?action=download&id=%s'
-        url = url % song['link']
-        try:
-            wdata = urlopen(url, timeout=30).read().decode("utf8")
-        except Exception:
-            time.sleep(2) # try again
-            wdata = urlopen(url, timeout=7).read().decode("utf8")
 
-        j = json.loads(wdata)
-        track_url = j['track_link']
-        return track_url
-    else:
-        return song['track_url']
+    url = 'https://databrainz.com/api/data_api_new.cgi'
+    wdata = requests.get(
+        url,
+        params={
+            'jsoncallback': 'jQuery1111046508799818694146_1529589898496',
+            'id': song['file_id'],
+            'r': 'mpl',
+            'format': 'json',
+            '_': current_milli_time(),
+        },
+        headers={"User-Agent": UA},
+    )
+    song = as_json(wdata.text)
+    return song['song']['url']
 
 
 opener = build_opener()
-ua = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)"
-opener.addheaders = [("User-Agent", ua)]
+opener.addheaders = [("User-Agent", UA)]
 urlopen = opener.open
 
 MPLAYER = None
@@ -171,7 +168,8 @@ def playsong(song, failcount=0):
     try:
         track_url = get_stream(song)
         song['track_url'] = track_url
-    except:
+    except Exception as e:
+        print e
         return False
 
     try:
@@ -179,6 +177,7 @@ def playsong(song, failcount=0):
     except (IOError, KeyError):
         return False
     MPD.clear()
+    print "playing", track_url
     MPD.add(track_url)
     MPD.play(0)
     MPD.consume(1)
@@ -195,11 +194,5 @@ def pause_pause():
 
 # https://code.google.com/p/mpylayer/wiki/AvailableCommandsAndProperties
 def status():
-
-    # MPD.currentsong()
-    #{'pos': '0', 'file': 'http://s2.pleer.com/0548f7a7af36579d7939cbe4cf02ac66ceece84879889383e7566a9ea253905dd46294616577f1df5f4fc68c705e9d0a1a9e4d6b29de0d0680548c40b550d36f11389b6817281a521cebbb5bbd4edf5568/8be52443b3.mp3', 'id': '3'}
-    # MPD.status()
-    # {'songid': '3', 'playlistlength': '1', 'playlist': '8', 'repeat': '0', 'consume': '1', 'mixrampdb': '0.000000', 'random': '0', 'state': 'play', 'elapsed': '29.466', 'volume': '-1', 'single': '0', 'time': '29:224', 'song': '0', 'audio': '44100:16:2', 'bitrate': '186'}
-
     return MPD.status()
 
