@@ -79,6 +79,18 @@ def as_json(text):
     return json.loads(text[startidx + 1:endidx])
 
 
+import math
+
+def convert_size(size_bytes):
+   if size_bytes == 0:
+       return "0B"
+   size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+   i = int(math.floor(math.log(size_bytes, 1024)))
+   p = math.pow(1024, i)
+   s = round(size_bytes / p, 2)
+   return "%s %s" % (s, size_name[i])
+
+
 def dosearch(term):
     """ Perform search. """
     # https://databrainz.com/api/search_api.cgi?jsoncallback=jQuery1111010430388749936614_1529588452356&qry=mario&format=json&mh=50&where=mpl&r=&y=0721190802155c415d5c405d5d445f5d435455475854495f5b465d59&_=1529588452358
@@ -92,13 +104,16 @@ def dosearch(term):
             "where": "mpl",
             '_': current_milli_time(),
         })
-
-        search = as_json(wdata.text)
+        try:
+            search = as_json(wdata.text)
+        except ValueError:
+            logger.debug("text: {}".format(wdata.text))
+            raise
         songs = []
         for song in search['results']:
             songs.append({
-                'duration': song['time'],
-                'size': int(float(song['size'])),
+                'duration': convert_size(float(song['size'])),
+                'size': int(song['size']),
                 'file_id': song['url'],
                 'singer': song['artist'],
                 'song': song['title'],
@@ -195,7 +210,6 @@ def pause_pause():
     return MPD.pause()
 
 
-# https://code.google.com/p/mpylayer/wiki/AvailableCommandsAndProperties
 def status():
     return MPD.status()
 
