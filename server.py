@@ -345,8 +345,12 @@ def _percent():
     if not CURRENT:
         return 0
     status = mps.MPD.status()
-    elapsed = float(status["elapsed"])
-    duration = float(status["duration"])
+    elapsed = 0
+    if "elapsed" in status:
+        elapsed = float(status["elapsed"])
+    duration = 1
+    if "duration" in status:
+        duration = float(status["duration"])
     return (elapsed / duration) * 100
 
 
