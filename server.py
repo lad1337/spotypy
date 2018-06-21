@@ -346,9 +346,8 @@ def _percent():
         return 0
     status = mps.MPD.status()
     elapsed = float(status["elapsed"])
-    duration_min, duration_sec_part = CURRENT["duration"].split(":")
-    duration_sec = (int(duration_min) * 60) + int(duration_sec_part)
-    return (elapsed / duration_sec) * 100
+    duration = float(status["duration"])
+    return (elapsed / duration) * 100
 
 
 @application.post('/status')
@@ -362,7 +361,6 @@ def set_stats():
 
 if __name__ == "__main__":
     import bottle
-    import argparse
 
     logging.basicConfig()
     root = logging.getLogger()
