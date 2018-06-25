@@ -26,7 +26,6 @@ CURRENT = {}
 QUEUE = {}
 QUEUE_IDS = []
 
-LASTFM_USER_LIST = []
 
 q_lock = Lock()
 
@@ -54,14 +53,6 @@ def check_q():
 def _fucking_next():
     if QUEUE_IDS and QUEUE:
         _start_song(QUEUE[QUEUE_IDS[0].uuid])
-        time.sleep(1)
-    elif LASTFM_USER_LIST:
-        results = None
-        while not results:
-            r_song = choice(choice(map(_lastfm, LASTFM_USER_LIST)))
-            results = mps.search(*r_song.split("-"))
-            time.sleep(1)
-        _start_song(choice(results))
         time.sleep(1)
 
 
@@ -125,12 +116,6 @@ def _remove_from_q(song_data):
         del QUEUE[s_uuid]
 
 
-def _lastfm(user_name):
-    url = 'http://ws.audioscrobbler.com/1.0/user/{}/recenttracks.rss'.format(user_name)
-    logging.debug(u"feed url: {}".format(url))
-    d = feedparser.parse(url)
-    return [i.title for i in d.entries]
-
 
 def _steal_image(song_data):
     term = u"{singer} {song} album cover".format(**song_data)
@@ -162,17 +147,9 @@ def files(filename):
 @application.get('/search')
 def search():
     params = bottle.request.params
-    result = []
-    if params["term"].startswith("fm"):
-        for song in _lastfm(params["term"].split()[1].strip()):
-            song = unicode(song, encoding='utf-8')
-            _results = mps.search(*map(strip, song.split("-")))
-            if _results:
-                result.append(_results[0])
-    else:
-        result = mps.search(unicode(params["term"], encoding='utf-8'))
+    result = mps.search(unicode(params["term"], encoding='utf-8'))
     for r in result:
-        if not "uuid" in r:
+        if "uuid" not in r:
             r["uuid"] = str(uuid.uuid4())
     response.content_type = 'application/json'
     return json.dumps(result)
@@ -186,32 +163,6 @@ def play_song():
     response.content_type = 'application/json'
     return json.dumps({"result": result})
 
-
-@application.post('/user')
-def user():
-    global LASTFM_USER_LIST
-    user_name = json.loads(request.body.read()).get("user_name", 0)
-    if user_name and user_name not in LASTFM_USER_LIST:
-        LASTFM_USER_LIST.append(user_name)
-    response.content_type = 'application/json'
-    return json.dumps(LASTFM_USER_LIST)
-
-
-@application.get('/users')
-def users():
-    global LASTFM_USER_LIST
-    response.content_type = 'application/json'
-    return json.dumps(LASTFM_USER_LIST)
-
-
-@application.post('/remove_user')
-def remove_user():
-    global LASTFM_USER_LIST
-    user_name = json.loads(request.body.read()).get("user_name", 0)
-    if user_name and user_name in LASTFM_USER_LIST:
-        LASTFM_USER_LIST.remove(user_name)
-    response.content_type = 'application/json'
-    return json.dumps(LASTFM_USER_LIST)
 
 
 @application.get('/current')
