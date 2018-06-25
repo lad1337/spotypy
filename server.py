@@ -5,11 +5,8 @@ import json
 import uuid
 import time
 import mps
-import feedparser
 import requests
-from random import choice
 from threading import Lock
-from string import strip
 from bottle import Bottle, static_file, response, request
 from bs4 import BeautifulSoup
 

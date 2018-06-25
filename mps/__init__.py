@@ -4,7 +4,10 @@ import json
 import os
 import logging
 import math
+
 from mpd import MPDClient
+import pafy
+
 
 logger = logging.getLogger("mps")
 
@@ -18,8 +21,9 @@ UA = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)"
 
 def search(artist, song_title=u""):
     logging.debug(u"searching for: {} - {}".format(artist, song_title))
-    search_term = u"{} {}".format(artist, song_title)
-    
+    search_term = u"{} {}".format(artist, song_title).strip()
+    if "youtu" in search_term:
+        return do_yt_search(search_term)
     return dosearch(search_term)
 
 
@@ -30,13 +34,30 @@ def as_json(text):
 
 
 def convert_size(size_bytes):
-   if size_bytes == 0:
+    if size_bytes == 0:
        return "0B"
-   size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-   i = int(math.floor(math.log(size_bytes, 1024)))
-   p = math.pow(1024, i)
-   s = round(size_bytes / p, 2)
-   return "%s %s" % (s, size_name[i])
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
+
+
+def do_yt_search(url):
+    video = pafy.new(url)
+    audio = video.getbestaudio()
+    size = audio.get_filesize()
+    song = {
+        'duration': video.duration.strip('0:'),
+        'size': int(size),
+        'file_id': video.videoid,
+        'track_url': audio.url,
+        'singer': video.author,
+        'song': video.title,
+        'cover_url': video.thumb,
+        'album': video.author,
+    }
+    return [song]
 
 
 def dosearch(term):
@@ -48,7 +69,7 @@ def dosearch(term):
             "format": "json",
             "jsoncallback": "jQuery1111010430388749936614_1529588452356",
             "mh": 50,
-            "qry": term.strip(),
+            "qry": term,
             "where": "mpl",
             '_': current_milli_time(),
         })
@@ -95,12 +116,15 @@ def get_stream(song):
 
 
 def playsong(song, failcount=0):
-    try:
-        track_url = get_stream(song)
-        song['track_url'] = track_url
-    except Exception:
-        logger.exception()
-        return False
+    if 'track_url' not in song:
+        try:
+            track_url = get_stream(song)
+            song['track_url'] = track_url
+        except Exception:
+            logger.exception()
+            return False
+    else:
+        track_url = song['track_url']
 
     MPD.clear()
     logger.debug("playing {}".format(track_url))
