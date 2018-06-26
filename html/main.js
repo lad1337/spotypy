@@ -1,13 +1,5 @@
 
 
-function check_percent(){
-    $.getJSON("/percent", function(res){
-        if(res.percent < 3)
-            check_queue();
-        if(res.percent)
-            $("nav .progress-bar").css("width", res.percent + "%");
-    });
-}
 
 function check_queue(){
     var source   = $("#queue-item-template").html();
@@ -34,6 +26,24 @@ function check_queue(){
     check_current();
 }
 
+function check_status(){
+    $.get('/status', function(status){
+        if(!status)
+            return
+        // persist volume
+        $(".player-control.volume").data("volume", status.volume);
+        // progress bar
+        var percent = (status.elapsed / status.duration) * 100;
+        $("nav .progress-bar").css("width", percent + "%");
+        // play pause button
+        var play_pause_icon = $(".play-pause .glyphicon");
+        if(status.state == 'play')
+            play_pause_icon.addClass('glyphicon-pause').removeClass('glyphicon-play');
+        else
+            play_pause_icon.addClass('glyphicon-play').removeClass('glyphicon-pause');
+
+    });
+}
 
 function check_current(){
     var source   = $("#current-item-template").html();
@@ -72,11 +82,12 @@ var refresh_interval_percent;
 var refresh_interval_queue;
 function init_polls(){
 
-    check_percent();
-    refresh_interval_percent = window.setInterval(check_percent, 1000);
-
     check_queue();
     refresh_interval_queue = window.setInterval(check_queue, 20000);
+
+    check_status();
+    refresh_interval_status = window.setInterval(check_status, 1000);
+
 }
 
 function is_song_in_list(uuid, list){
@@ -103,7 +114,11 @@ $(document).ready(function() {
     $(".play-pause").click(function(){
         var icon = $(this);
         set_mark_request(icon);
-        $.get("/pause",function(){check_queue(); remove_mark_request(icon);});
+        $.get("/pause",function(is_playing){
+            check_queue();
+            remove_mark_request(icon);
+
+        });
     });
     $(".stop").click(function(){
         var icon = $(this);
@@ -143,7 +158,6 @@ $(document).ready(function() {
             volume = 100;
         $.post("/status", JSON.stringify({setvol: volume}),function(){
             check_queue();
-            $(".player-control.volume").data("volume", volume);
             remove_mark_request(icon);
         });
     });

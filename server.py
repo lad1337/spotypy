@@ -40,11 +40,14 @@ class QueueItem(object):
 def check_q():
     global CURRENT, QUEUE, QUEUE_IDS, HISTORY, HISTORY_IDS, q_lock
     with q_lock:
-        if mps.status()["state"] == "stop":
+        status = mps.status()
+        if status["state"] == "stop":
             _fucking_next()
             return
-        if _percent() > 98:
+
+        if _percent() > 99:
             _stop()
+    return status
 
 
 def _fucking_next():
@@ -113,7 +116,6 @@ def _remove_from_q(song_data):
         del QUEUE[s_uuid]
 
 
-
 def _steal_image(song_data):
     term = u"{singer} {song} album cover".format(**song_data)
     # https://www.google.de/search?q=Emil+Bulls+-+Here+Comes+the+Fire&tbm=isch
@@ -152,14 +154,12 @@ def search():
     return json.dumps(result)
 
 
-
 @application.post('/play')
 def play_song():
     song_data = json.loads(request.body.read())
     result = _start_song(song_data)
     response.content_type = 'application/json'
     return json.dumps({"result": result})
-
 
 
 @application.get('/current')
@@ -257,7 +257,7 @@ def stop():
 @application.get('/pause')
 def pause():
     global QUEUE, QUEUE_IDS
-    result = mps.pause_pause()
+    result = mps.pause()
     if not result:
         _fucking_next()
     response.content_type = 'application/json'
@@ -278,21 +278,15 @@ def prev():
 
 @application.get('/status')
 def status():
+    status = check_q()
     response.content_type = 'application/json'
-    return json.dumps(mps.status())
-
-
-@application.get('/percent')
-def percent():
-    check_q()
-    response.content_type = 'application/json'
-    return json.dumps({"percent": _percent()})
+    return json.dumps(status)
 
 
 def _percent():
     if not CURRENT:
         return 0
-    status = mps.MPD.status()
+    status = mps.status()
     elapsed = 0
     if "elapsed" in status:
         elapsed = float(status["elapsed"])

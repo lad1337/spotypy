@@ -138,7 +138,7 @@ def stop():
     MPD.stop()
 
 
-def pause_pause():
+def pause():
     return MPD.pause()
 
 
